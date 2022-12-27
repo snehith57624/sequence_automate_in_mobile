@@ -10,16 +10,30 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
+    class Position {
+        int x, y;
 
+        Position(int xCor, int yCor){
+            x = xCor;
+            y = yCor;
+        }
+    }
+
+    public static List<Position> positionList;
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         String line="check";
+        positionList = new LinkedList<Position>();
         Process logcat;
         final StringBuilder log = new StringBuilder();
         try {
@@ -39,6 +53,16 @@ public class MainActivity extends AppCompatActivity {
         TextView myAwesomeTextView = (TextView)findViewById(R.id.textview);
         myAwesomeTextView.setText(log.toString());
         myAwesomeTextView.setOnTouchListener(handleTouch);
+    }
+
+    public void onStartClicked(){
+        positionList = new LinkedList<Position>();
+    }
+
+    private void onPlayClicked() throws IOException {
+        for (Position positionListElement : positionList) {
+            Runtime.getRuntime().exec(new String[]{"shell", "input","tap", String.valueOf(positionListElement.x), String.valueOf(positionListElement.y)});
+        }
     }
 
     private View.OnTouchListener handleTouch = new View.OnTouchListener() {
@@ -70,10 +94,10 @@ public class MainActivity extends AppCompatActivity {
                 while ((line = br.readLine()) != null) {
                     log.append(line);
                     log.append(separator);
-//                System.out.println(line);
                 }
                 logcat = Runtime.getRuntime().exec(new String[]{"logcat", "-c"});
-                logcat = Runtime.getRuntime().exec(new String[]{"shell", "input","tap", String.valueOf(x), String.valueOf(y)});
+//                logcat = Runtime.getRuntime().exec(new String[]{"shell", "input","tap", String.valueOf(x), String.valueOf(y)});
+                positionList.add(new Position(x, y));
             } catch (Exception e) {
                 e.printStackTrace();
             }
